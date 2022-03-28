@@ -41,12 +41,27 @@ bool Shape::validate() const {
 
 static void deconvergeEdge(EdgeHolder &edgeHolder, int param) {
     {
-        const QuadraticSegment *quadraticSegment = dynamic_cast<const QuadraticSegment *>(&*edgeHolder);
+        const QuadraticSegment *quadraticSegment = nullptr;
+#ifdef MSDFGEN_NO_RTTI
+        if (edgeHolder->getType() == EdgeType::ETQuadratic) {
+            quadraticSegment = reinterpret_cast<const QuadraticSegment *>(&*edgeHolder);
+        }
+#else
+        quadraticSegment = dynamic_cast<const QuadraticSegment *>(&*edgeHolder);
+#endif
         if (quadraticSegment)
             edgeHolder = quadraticSegment->convertToCubic();
     }
     {
-        CubicSegment *cubicSegment = dynamic_cast<CubicSegment *>(&*edgeHolder);
+        CubicSegment *cubicSegment = nullptr;
+#ifdef MSDFGEN_NO_RTTI
+        if (edgeHolder->getType() == EdgeType::ETCubic) {
+            cubicSegment = reinterpret_cast<CubicSegment *>(&*edgeHolder);
+        }
+#else
+        cubicSegment = dynamic_cast<CubicSegment *>(&*edgeHolder);
+#endif       
+        
         if (cubicSegment)
             cubicSegment->deconverge(param, MSDFGEN_DECONVERGENCE_FACTOR);
     }

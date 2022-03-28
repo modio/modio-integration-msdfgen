@@ -11,13 +11,31 @@ namespace msdfgen {
 #define MSDFGEN_CUBIC_SEARCH_STARTS 4
 #define MSDFGEN_CUBIC_SEARCH_STEPS 4
 
+#ifdef MSDFGEN_NO_RTTI
+namespace EdgeType {
+    enum Value {
+        ETUnknown,
+        ETLinear,
+        ETQuadratic,
+        ETCubic
+    };
+}
+#endif
+
 /// An abstract edge segment.
 class EdgeSegment {
 
+#ifdef MSDFGEN_NO_RTTI
+protected:
+    EdgeType::Value edgeType;
+#endif
 public:
     EdgeColor color;
-
+#ifdef MSDFGEN_NO_RTTI
+    EdgeSegment(EdgeColor edgeColor = WHITE) : edgeType(EdgeType::ETUnknown), color(edgeColor) { }
+#else
     EdgeSegment(EdgeColor edgeColor = WHITE) : color(edgeColor) { }
+#endif
     virtual ~EdgeSegment() { }
     /// Creates a copy of the edge segment.
     virtual EdgeSegment * clone() const = 0;
@@ -45,6 +63,9 @@ public:
     /// Splits the edge segments into thirds which together represent the original edge.
     virtual void splitInThirds(EdgeSegment *&part1, EdgeSegment *&part2, EdgeSegment *&part3) const = 0;
 
+#ifdef MSDFGEN_NO_RTTI
+    virtual EdgeType::Value getType() const;
+#endif
 };
 
 /// A line segment.

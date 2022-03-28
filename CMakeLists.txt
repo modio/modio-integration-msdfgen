@@ -2,6 +2,7 @@
 cmake_minimum_required(VERSION 3.15)
 
 option(MSDFGEN_CORE_ONLY "Only build the core library with no dependencies" OFF)
+option(MSDFGEN_DISABLE_RTTI "Disable the use of RTTI" OFF)
 option(MSDFGEN_BUILD_STANDALONE "Build the msdfgen standalone executable" ON)
 option(MSDFGEN_USE_OPENMP "Build with OpenMP support for multithreaded code" OFF)
 option(MSDFGEN_USE_CPP11 "Build with C++11 enabled" ON)
@@ -42,6 +43,19 @@ target_include_directories(msdfgen-core INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>
 )
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT msdfgen-core)
+
+if(MSDFGEN_DISABLE_RTTI)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        target_compile_options(msdfgen-core PUBLIC /GR-)
+    endif()
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        target_compile_options(msdfgen-core PUBLIC -fno-rtti)
+    endif()
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_compile_options(msdfgen-core PUBLIC -fno-rtti)
+    endif()
+    target_compile_definitions(msdfgen-core PUBLIC MSDFGEN_NO_RTTI)
+endif()
 
 if(MSDFGEN_USE_CPP11)
     target_compile_features(msdfgen-core PUBLIC cxx_std_11)

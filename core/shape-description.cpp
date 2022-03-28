@@ -244,14 +244,24 @@ bool writeShapeDescription(FILE *output, const Shape &shape) {
                         default:;
                     }
                 }
+#ifdef MSDFGEN_NO_RTTI
+                if ((*edge)->getType() == EdgeType::ETLinear) {
+                    const LinearSegment *e = reinterpret_cast<const LinearSegment *>(&**edge);
+#else
                 if (const LinearSegment *e = dynamic_cast<const LinearSegment *>(&**edge)) {
+#endif
                     fprintf(output, "\t");
                     writeCoord(output, e->p[0]);
                     fprintf(output, ";\n");
                     if (colorCode)
                         fprintf(output, "\t\t%c;\n", colorCode);
                 }
+#ifdef MSDFGEN_NO_RTTI
+                if ((*edge)->getType() == EdgeType::ETQuadratic) {
+                    const QuadraticSegment *e = reinterpret_cast<const QuadraticSegment *>(&**edge);
+#else
                 if (const QuadraticSegment *e = dynamic_cast<const QuadraticSegment *>(&**edge)) {
+#endif
                     fprintf(output, "\t");
                     writeCoord(output, e->p[0]);
                     fprintf(output, ";\n\t\t");
@@ -261,7 +271,12 @@ bool writeShapeDescription(FILE *output, const Shape &shape) {
                     writeCoord(output, e->p[1]);
                     fprintf(output, ");\n");
                 }
+#ifdef MSDFGEN_NO_RTTI
+                if ((*edge)->getType() == EdgeType::ETCubic) {
+                    const CubicSegment *e = reinterpret_cast<const CubicSegment *>(&**edge);
+#else
                 if (const CubicSegment *e = dynamic_cast<const CubicSegment *>(&**edge)) {
+#endif
                     fprintf(output, "\t");
                     writeCoord(output, e->p[0]);
                     fprintf(output, ";\n\t\t");

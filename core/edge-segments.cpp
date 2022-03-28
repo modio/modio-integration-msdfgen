@@ -6,6 +6,12 @@
 
 namespace msdfgen {
 
+#ifdef MSDFGEN_NO_RTTI
+EdgeType::Value EdgeSegment::getType() const {
+    return edgeType;
+}
+#endif
+
 void EdgeSegment::distanceToPseudoDistance(SignedDistance &distance, Point2 origin, double param) const {
     if (param < 0) {
         Vector2 dir = direction(0).normalize();
@@ -35,6 +41,9 @@ void EdgeSegment::distanceToPseudoDistance(SignedDistance &distance, Point2 orig
 LinearSegment::LinearSegment(Point2 p0, Point2 p1, EdgeColor edgeColor) : EdgeSegment(edgeColor) {
     p[0] = p0;
     p[1] = p1;
+#ifdef MSDFGEN_NO_RTTI
+    edgeType = EdgeType::ETLinear;
+#endif
 }
 
 QuadraticSegment::QuadraticSegment(Point2 p0, Point2 p1, Point2 p2, EdgeColor edgeColor) : EdgeSegment(edgeColor) {
@@ -43,6 +52,9 @@ QuadraticSegment::QuadraticSegment(Point2 p0, Point2 p1, Point2 p2, EdgeColor ed
     p[0] = p0;
     p[1] = p1;
     p[2] = p2;
+#ifdef MSDFGEN_NO_RTTI
+    edgeType = EdgeType::ETQuadratic;
+#endif
 }
 
 CubicSegment::CubicSegment(Point2 p0, Point2 p1, Point2 p2, Point2 p3, EdgeColor edgeColor) : EdgeSegment(edgeColor) {
@@ -54,6 +66,10 @@ CubicSegment::CubicSegment(Point2 p0, Point2 p1, Point2 p2, Point2 p3, EdgeColor
     p[1] = p1;
     p[2] = p2;
     p[3] = p3;
+#ifdef MSDFGEN_NO_RTTI
+    edgeType = EdgeType::ETCubic;
+#endif
+
 }
 
 LinearSegment * LinearSegment::clone() const {

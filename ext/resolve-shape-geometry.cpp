@@ -24,12 +24,30 @@ void shapeToSkiaPath(SkPath &skPath, const Shape &shape) {
         if (!contour->edges.empty()) {
             skPath.moveTo(pointToSkiaPoint(contour->edges.front()->point(0)));
             for (std::vector<EdgeHolder>::const_iterator edge = contour->edges.begin(); edge != contour->edges.end(); ++edge) {
+#ifdef MSDFGEN_NO_RTTI
+                switch(*edge->getType()) {
+                    case EdgeType::ETLinear:
+                        LinearSegment *linearSegment = reinterpret_cast<LinearSegment>(&**edge);
+                        skPath.lineTo(pointToSkiaPoint(linearSegment->p[1]));
+                    break;
+                    case EdgeType::ETQuadratic:
+                        QuadraticSegment *quadraticSegment = reinterpet_cast<QuadraticSegment(&**edge);
+                        skPath.quadTo(pointToSkiaPoint(quadraticSegment->p[1]), pointToSkiaPoint(quadraticSegment->p[2]));
+                    break;
+                    case EdgeType::ETCubic:
+                        CubicSegment *cubicSegment = reinterpret_cast<CubicSegment(&**edge);
+                        skPath.cubicTo(pointToSkiaPoint(cubicSegment->p[1]), pointToSkiaPoint(cubicSegment->p[2]), pointToSkiaPoint(cubicSegment->p[3]));
+                    break;
+                    
+                }
+#else
                 if (const LinearSegment *linearSegment = dynamic_cast<const LinearSegment *>(&**edge))
                     skPath.lineTo(pointToSkiaPoint(linearSegment->p[1]));
                 else if (const QuadraticSegment *quadraticSegment = dynamic_cast<const QuadraticSegment *>(&**edge))
                     skPath.quadTo(pointToSkiaPoint(quadraticSegment->p[1]), pointToSkiaPoint(quadraticSegment->p[2]));
                 else if (const CubicSegment *cubicSegment = dynamic_cast<const CubicSegment *>(&**edge))
                     skPath.cubicTo(pointToSkiaPoint(cubicSegment->p[1]), pointToSkiaPoint(cubicSegment->p[2]), pointToSkiaPoint(cubicSegment->p[3]));
+#endif
             }
         }
     }
